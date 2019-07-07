@@ -16,7 +16,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          OpenBarber
+          OpenBarber by Gabriel Martinez
         </a>
       </header>
     </div>
