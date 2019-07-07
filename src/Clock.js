@@ -181,6 +181,15 @@ class Clock extends React.Component {
     async fetchShops(){
       return(<div id="shops"></div>);
     }
+    renderShopsTab(){
+
+    }
+    renderLiveTab(){
+
+    }
+    renderMessagesTab(){
+
+    }
     render() {
       return (
         
@@ -200,18 +209,40 @@ class Clock extends React.Component {
           </ul>
           </div>
           </nav>
-          <div className="row" >
-              <div id="alert" className="alert alert-danger" role="alert"></div>
-          </div>
-            
-          <h1>Hello, world!</h1>
-          <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-          <div id="spinner_map" className="d-flex justify-content-center">
-            <div className="spinner-border text-danger" role="status">
-             <span className="sr-only">Loading...</span>
+          <ul className="nav nav-tabs" role="tablist">
+            <li className="nav-item">
+              <a className="nav-link active" data-toggle="tab" href="#tab-one">Shops</a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" data-toggle="tab" href="#tab-two">Live View</a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" data-toggle="tab" href="#tab-three">Messages</a>
+            </li>
+          </ul>
+          <div className="tab-content">
+            <div id="tab-one" className="container tab-pane active">
+              <div className="row" >
+                <div id="alert" className="alert alert-danger" role="alert"></div>
+              </div>
+                <h1>Hello, world!</h1>
+                <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+                <div id="spinner_map" className="d-flex justify-content-center">
+                  <div className="spinner-border text-danger" role="status">
+                  <span className="sr-only">Loading...</span>
+                  </div>
+                </div>
+                <div id="map" className="map"></div>
+              </div>
+            <div id="tab-two" className="container tab-pane fade">
+              <h3>Menu 1</h3>
+              <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            </div>
+            <div id="tab-three" className="container tab-pane fade">
+              <h3>Menu 2</h3>
+              <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
             </div>
           </div>
-          <div id="map" className="map"></div>
         </div>
       );
     }
