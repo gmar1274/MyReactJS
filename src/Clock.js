@@ -14,12 +14,17 @@ class Clock extends React.Component {
         () => this.tick(),
         1000
       );
+      this.isLoggedIn();//check to see if user is logged in
       this.getUserLocation();//async get user location to display map
     }
   
     componentWillUnmount() {
       clearInterval(this.timerID);
       this.state.map.remove();
+    }
+    async isLoggedIn(){
+      let user = {user:{name:"Gabe"}};
+      this.setState(user);
     }
     async getUserLocation(){
       const status = document.querySelector('#alert');
@@ -126,6 +131,9 @@ class Clock extends React.Component {
                 "geometry": {
                   "type": "Point",
                   "coordinates": obj.state.userLoc
+                },
+                "properties":{
+                  "description": !obj.state.user.name ? "Me":obj.state.user.name
                 }
               }]
             }
@@ -134,6 +142,35 @@ class Clock extends React.Component {
           "icon-image": "pulsing-dot"
           }
         });
+        ///////////////on load
+        // When a click event occurs on a feature in the places layer, open a popup at the
+        // location of the feature, with description HTML from its properties.
+        map.on('click', 'points', function (e) {
+          var coordinates = e.features[0].geometry.coordinates.slice();
+          var description = e.features[0].properties.description;
+          // Ensure that if the map is zoomed out such that multiple
+          // copies of the feature are visible, the popup appears
+          // over the copy being pointed to.
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+          
+          new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(description)
+          .addTo(map);
+          map.flyTo({center: e.features[0].geometry.coordinates});
+        });
+          
+          // Change the cursor to a pointer when the mouse is over the places layer.
+          map.on('mouseenter', 'points', function () {
+          map.getCanvas().style.cursor = 'pointer';
+          });
+          
+          // Change it back to a pointer when it leaves.
+          map.on('mouseleave', 'points', function () {
+          map.getCanvas().style.cursor = '';
+          });
       });
       
       this.setState({map:map});
