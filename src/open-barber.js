@@ -3,10 +3,14 @@ import logo from './assets/acba.png';
 import './App.css';
 
 
-class Clock extends React.Component {
+class OpenBarber extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {date: new Date()};
+      this.state = {
+        date: new Date(),
+        shops: [],// hold shop info e.g. name, stylists, time, location...
+        messages: []// hold conversations between stylists and user
+      };
     }
    
     componentDidMount() {
@@ -16,6 +20,11 @@ class Clock extends React.Component {
       );
       this.isLoggedIn();//check to see if user is logged in
       this.getUserLocation();//async get user location to display map
+      this.fetchShops().then(response => {
+        this.setState({
+          shops: response.shops
+        });
+      });
     }
   
     componentWillUnmount() {
@@ -65,12 +74,12 @@ class Clock extends React.Component {
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v11',
         center: this.state.userLoc, // starting position [lng, lat]
-        zoom: 15 // starting zoom
+        zoom: 12 // starting zoom
       });
       /*
        * Add animated marker
        */
-      var size = 200;
+      var size = 170;
       var pulsingDot = {
         width: size,
         height: size,
@@ -142,6 +151,7 @@ class Clock extends React.Component {
           "icon-image": "pulsing-dot"
           }
         });
+        map.resize();
         ///////////////on load
         // When a click event occurs on a feature in the places layer, open a popup at the
         // location of the feature, with description HTML from its properties.
@@ -172,7 +182,6 @@ class Clock extends React.Component {
           map.getCanvas().style.cursor = '';
           });
       });
-      
       this.setState({map:map});
     }
     /**
@@ -220,25 +229,33 @@ class Clock extends React.Component {
               <a className="nav-link" data-toggle="tab" href="#tab-three">Messages</a>
             </li>
           </ul>
-          <div className="tab-content">
-            <div id="tab-one" className="container tab-pane active">
+          <div className="tab-content" id="tab-content-pane">
+
+            <div id="tab-one" className="container-fluid tab-pane active">
               <div className="row" >
                 <div id="alert" className="alert alert-danger" role="alert"></div>
               </div>
-                <h1>Hello, world!</h1>
-                <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+              
+              <div className="row">
                 <div id="spinner_map" className="d-flex justify-content-center">
                   <div className="spinner-border text-danger" role="status">
                   <span className="sr-only">Loading...</span>
                   </div>
                 </div>
-                <div id="map" className="map"></div>
+                <div id="map"></div>
               </div>
-            <div id="tab-two" className="container tab-pane fade">
+
+              <div className="row">
+                <h1>Hello, world!</h1>
+                <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+              </div>
+            </div>
+
+            <div id="tab-two" className="container-fluid tab-pane fade">
               <h3>Menu 1</h3>
               <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
             </div>
-            <div id="tab-three" className="container tab-pane fade">
+            <div id="tab-three" className="container-fluid tab-pane fade">
               <h3>Menu 2</h3>
               <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
             </div>
@@ -247,4 +264,4 @@ class Clock extends React.Component {
       );
     }
   }
-  export default Clock;
+  export default OpenBarber;
