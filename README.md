@@ -1,2 +1,3 @@
 # MyReactJS
-Portfolio web development
+##Portfolio web development
+More information when project gets finished...
