@@ -1,15 +1,13 @@
-open-chair-app {
-  --app-bg-color: rgb(210, 0, 0);
-  --padding: 8px;
+.open-chair-app {
+  $app-bg-color: rgb(0, 137, 190);
+  $padding: 8px;
   margin: 0%;
   padding: 0%;
-  padding-left: 0%;
-  padding-right: 0%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-      "Droid Sans", "Helvetica Neue", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   code {
@@ -55,7 +53,7 @@ open-chair-app {
   }
 
   .navbar {
-    background-color: var(--app-bg-color);
+    background-color: $app-bg-color;
   }
 
   #map {
@@ -75,8 +73,8 @@ open-chair-app {
 
   .alert {
     visibility: hidden;
-    padding-left: var(--padding);
-    padding-right: var(--padding);
+    padding-left: $padding;
+    padding-right: $padding;
   }
 
   #spinner {
