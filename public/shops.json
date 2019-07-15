@@ -4,6 +4,7 @@
         {
             "type": "Feature",
             "properties": {
+                "name":"Shop",
                 "message": "Foo",
                 "iconSize": [
                     60,
@@ -22,6 +23,7 @@
             "type": "Feature",
             "properties": {
                 "message": "Bar",
+                "name":"Shop Two",
                 "iconSize": [
                     50,
                     50
@@ -39,6 +41,7 @@
             "type": "Feature",
             "properties": {
                 "message": "Baz",
+                "name":"Shop Three",
                 "iconSize": [
                     40,
                     40

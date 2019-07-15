@@ -2,7 +2,7 @@ import React from 'react';
 import logo from './assets/acba.png';
 import './App.scss';
 import { library } from '@fortawesome/fontawesome-svg-core'
-//import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStore } from '@fortawesome/free-solid-svg-icons'
 library.add(faStore);
 class OpenBarber extends React.Component {
@@ -22,7 +22,23 @@ class OpenBarber extends React.Component {
       1000
     );
     this.isLoggedIn();//check to see if user is logged in
-    this.getUserLocation();//async get user location to display map
+    this.getUserLocation().then(geoLocation => {
+      let self = this;
+      let status = self.status;
+      function success(position) {
+        self.state.status.remove();
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        let loc = [longitude, latitude];
+        self.setState({ userLoc: loc });
+        self.initMap();
+        self.fetchShops();
+      }
+      function error() {
+        status.textContent = 'Unable to retrieve your location';
+      }
+      geoLocation.getCurrentPosition(success, error);
+    });//async get user location to display map
     this.fetchShops().then(response => {
       this.setState({
         shops: response.shops
@@ -40,25 +56,12 @@ class OpenBarber extends React.Component {
   }
   async getUserLocation() {
     const status = document.querySelector('#alert');
-    let obj = this;
-    function success(position) {
-      status.remove();
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      let loc = [longitude, latitude];
-
-      obj.setState({ userLoc: loc });
-      obj.initMap();
-      obj.fetchShops();
-    }
-    function error() {
-      status.textContent = 'Unable to retrieve your location';
-    }
+    this.setState({ status: status });
     if (!navigator.geolocation) {
       status.textContent = 'Geolocation is not supported by your browser';
     } else {
       status.textContent = 'Locating…';
-      navigator.geolocation.getCurrentPosition(success, error);
+      return navigator.geolocation;//.getCurrentPosition(success, error);
     }
   }
 
@@ -70,7 +73,7 @@ class OpenBarber extends React.Component {
   async initMap() {
     const spinner = document.querySelector("#spinner_map");
     spinner.remove();
-    let obj = this;
+    let self = this;
     var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ21hcjEyNzQiLCJhIjoiY2p4czE4NjBmMGV6cjNocW9taWZiMmRtMCJ9.07lhwOhzB_nSEQg2sC11-A';
     let map = new mapboxgl.Map({
@@ -134,10 +137,10 @@ class OpenBarber extends React.Component {
               "type": "Feature",
               "geometry": {
                 "type": "Point",
-                "coordinates": obj.state.userLoc
+                "coordinates": self.state.userLoc
               },
               "properties": {
-                "description": !obj.state.user.name ? "Me" : obj.state.user.name
+                "description": !self.state.user.name ? "Me" : self.state.user.name
               }
             }]
           }
@@ -180,21 +183,12 @@ class OpenBarber extends React.Component {
     let geojson = await response.json();
     // add markers to map
     geojson.features.forEach(function (marker) {
-      console.log("Marker: ");
-      console.log(marker);
-      // create a DOM element for the marker
-      var el = document.createElement("FontAwesomeIcon");
-      el.className = "faStore";
-      //el.style.backgroundImage = 'url(https://placekitten.com/g/' + marker.properties.iconSize.join('/') + '/)';
-      el.style.width = marker.properties.iconSize[0] + 'px';
-      el.style.height = marker.properties.iconSize[1] + 'px';
+      let el = React.createElement("FontAwesomeIcon", { icon: { faStore }, size: "4x", className: "marker" });
       console.log(el);
-      el.addEventListener('click', function () {
-        window.alert(marker.properties.message);
-      });
       // add marker to map
       new mapboxgl.Marker(el)
-        .setLngLat(marker.geometry.coordinates)
+        .setLngLat(marker.geometry.coordinates).setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+          .setHTML('<div class=marker-title>' + marker.properties.name + '</div><div class=marker-description>' + marker.properties.message + '</div>'))
         .addTo(map);
     });
     this.setState({ map: map });
@@ -217,64 +211,71 @@ class OpenBarber extends React.Component {
   render() {
     return (
 
-      <div className="container-fluid" >
-        <nav className="navbar navbar-expand-lg navbar-dark">
-          <a className="navbar-brand" href={this.home}>
-            <img src={logo} width="30" height="30" className="d-inline-block align-top App-logo " alt="logo" />
-          </a>
-          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav">
-              <li className="nav-item active">
-                <a className="nav-link" href={this.home} alt="home link">Home <span className="sr-only">(current)</span></a>
+      <div className="container-fluid d-flex h-100 flex-column">
+        <div className="row">
+          <div className="col">
+            <nav className="navbar navbar-expand-lg navbar-dark">
+              <a className="navbar-brand" href={this.home}>
+                <img src={logo} width="30" height="30" className="d-inline-block align-top App-logo " alt="logo" />
+              </a>
+              <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span className="navbar-toggler-icon"></span>
+              </button>
+              <div className="collapse navbar-collapse" id="navbarNav">
+                <ul className="navbar-nav">
+                  <li className="nav-item active">
+                    <a className="nav-link" href={this.home} alt="home link">Home <span className="sr-only">(current)</span></a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            <ul className="nav nav-tabs" role="tablist">
+              <li className="nav-item">
+                <a className="nav-link active" data-toggle="tab" href="#tab-one" alt="tab one">Shops</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" data-toggle="tab" href="#tab-two" alt="tab two">Live View</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" data-toggle="tab" href="#tab-three" alt="tab three">Messages</a>
               </li>
             </ul>
           </div>
-        </nav>
-        <ul className="nav nav-tabs" role="tablist">
-          <li className="nav-item">
-            <a className="nav-link active" data-toggle="tab" href="#tab-one" alt="tab one">Shops</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" data-toggle="tab" href="#tab-two" alt="tab two">Live View</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" data-toggle="tab" href="#tab-three" alt="tab three">Messages</a>
-          </li>
-        </ul>
-        <div className="tab-content" id="tab-content-pane">
+        </div>
 
-          <div id="tab-one" className="container-fluid tab-pane active">
-            <div className="row" >
-              <div id="alert" className="alert alert-danger" role="alert"></div>
-            </div>
 
-            <div className="row justify-content-center">
-              <div id="spinner_map" className="d-flex justify-content-center">
-                <div className="spinner-border text-danger" role="status">
-                  <span className="sr-only">Loading...</span>
+        <div className="row bg-light flex-fill d-flex justify-content-start">
+          <div className="col portlet-container portlet-dropzone">
+            <div className="tab-content" id="tab-content-pane">
+
+              <div id="tab-one" className="row tab-pane fade active">
+                <div className="row" >
+                  <div id="alert" className="alert alert-danger" role="alert"></div>
+                </div>
+                <div className="row h-100">
+                  <div id="spinner_map" className="justify-content-center">
+                    <div className="spinner-border text-danger" role="status">
+                      <span className="sr-only">Loading...</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="row h-100">
+
+                  <div className='sidebar pad2'>Listing</div>
+                  <div id='map' className='pad2'>Map</div>
+
                 </div>
               </div>
-              <div id="map"></div>
-            </div>
 
-            <div className="row">
-              <h1>Hello, world!</h1>
+              <div id="tab-two" className="container-fluid tab-pane fade">
+                <h3>Menu 1</h3>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+              </div>
+              <div id="tab-three" className="container-fluid tab-pane fade">
+                <h3>Menu 2</h3>
+                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+              </div>
             </div>
-            <div className="row">
-              <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-            </div>
-          </div>
-
-          <div id="tab-two" className="container-fluid tab-pane fade">
-            <h3>Menu 1</h3>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          </div>
-          <div id="tab-three" className="container-fluid tab-pane fade">
-            <h3>Menu 2</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
           </div>
         </div>
       </div>
